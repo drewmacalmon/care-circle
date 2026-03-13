@@ -128,6 +128,20 @@ body {
 .nav-btn.active { color: var(--rose-deep); }
 .nav-btn svg { transition: stroke 0.2s; }
 
+/* ─── Calendar two-column layout ─────────────── */
+.cal-tab-scroll {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+}
+.cal-panel {
+  flex-shrink: 0;
+}
+.treatment-panel {
+  flex: 1;
+}
+
 /* ─── Calendar ────────────────────────────────── */
 .cal-header {
   padding: 16px 20px 8px;
@@ -671,6 +685,24 @@ body {
   .stat-row { margin: 0 24px 16px; }
   .info-row { margin: 0 24px 10px; }
   .share-card { margin: 16px 24px; }
+
+  /* Calendar two-column layout on desktop */
+  .cal-tab-scroll {
+    flex-direction: row;
+    overflow: hidden;
+  }
+  .cal-panel {
+    width: 320px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    height: 100%;
+  }
+  .treatment-panel {
+    flex: 1;
+    overflow-y: auto;
+    height: 100%;
+  }
 }
 
 /* ─── Sidebar internals ───────────────────────── */

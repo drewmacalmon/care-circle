@@ -43,7 +43,9 @@ export default function CalendarTab({ treatments, onDayClick, onTreatmentClick }
   const displayList = upcoming.length > 0 ? upcoming : sorted
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto' }}>
+    <div className="cal-tab-scroll">
+      {/* Left panel: calendar grid */}
+      <div className="cal-panel">
       {/* Month nav */}
       <div className="cal-header">
         <div className="cal-title">{MONTHS[month]} {year}</div>
@@ -83,47 +85,50 @@ export default function CalendarTab({ treatments, onDayClick, onTreatmentClick }
           })}
         </div>
       </div>
+      </div>
 
-      {/* Upcoming treatment list */}
-      <div className="section-title">Upcoming treatment dates</div>
+      {/* Right panel: upcoming treatment list */}
+      <div className="treatment-panel">
+        <div className="section-title">Upcoming treatment dates</div>
 
-      {displayList.length === 0 ? (
-        <div className="empty-state">
-          No treatment dates yet.<br />Tap + to add your first one.
-        </div>
-      ) : (
-        displayList.map(t => {
-          const tasks = t.tasks || []
-          const claimed = tasks.filter(tk => tk.claimed_by).length
-          const open = tasks.length - claimed
-          const d = new Date(t.date + 'T12:00:00')
+        {displayList.length === 0 ? (
+          <div className="empty-state">
+            No treatment dates yet.<br />Tap + to add your first one.
+          </div>
+        ) : (
+          displayList.map(t => {
+            const tasks = t.tasks || []
+            const claimed = tasks.filter(tk => tk.claimed_by).length
+            const open = tasks.length - claimed
+            const d = new Date(t.date + 'T12:00:00')
 
-          return (
-            <div key={t.id} className="treatment-card" onClick={onTreatmentClick}>
-              <div className="tc-icon">
-                <Pill size={18} color="white" />
-              </div>
-              <div className="tc-info">
-                <div className="tc-date">
-                  {d.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric' })}
+            return (
+              <div key={t.id} className="treatment-card" onClick={onTreatmentClick}>
+                <div className="tc-icon">
+                  <Pill size={18} color="white" />
                 </div>
-                {t.notes && <div className="tc-meta">{t.notes}</div>}
-                <div className="tc-tasks">{claimed}/{tasks.length} tasks covered</div>
-              </div>
-              {open > 0
-                ? <div className="badge">{open} open</div>
-                : (
-                  <div style={{ fontSize: 12, color: 'var(--sage)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <Check size={12} color="var(--sage)" strokeWidth={2.5} /> All set
+                <div className="tc-info">
+                  <div className="tc-date">
+                    {d.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric' })}
                   </div>
-                )
-              }
-            </div>
-          )
-        })
-      )}
+                  {t.notes && <div className="tc-meta">{t.notes}</div>}
+                  <div className="tc-tasks">{claimed}/{tasks.length} tasks covered</div>
+                </div>
+                {open > 0
+                  ? <div className="badge">{open} open</div>
+                  : (
+                    <div style={{ fontSize: 12, color: 'var(--sage)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Check size={12} color="var(--sage)" strokeWidth={2.5} /> All set
+                    </div>
+                  )
+                }
+              </div>
+            )
+          })
+        )}
 
-      <div style={{ height: 80 }} />
+        <div style={{ height: 80 }} />
+      </div>
     </div>
   )
 }
