@@ -1,13 +1,24 @@
 import { useState, useRef } from 'react'
-import { Pill, Check } from 'lucide-react'
+import { Pill, Check, Trash2 } from 'lucide-react'
 import { TASK_ICON_MAP } from '../constants'
 import { supabase } from '../supabase'
 import ClaimModal from './ClaimModal'
 
 export default function TaskList({ treatments, isPatient, patientName, showToast, onClaimSuccess }) {
-  const [claimTarget, setClaimTarget] = useState(null) // { treatment, task }
+  const [claimTarget, setClaimTarget] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState(null) // treatment id pending confirmation
+  const [deleting, setDeleting] = useState(false)
   const claimerNameRef = useRef('')
+
+  const handleDelete = async (treatmentId) => {
+    setDeleting(true)
+    await supabase.from('tasks').delete().eq('treatment_id', treatmentId)
+    await supabase.from('treatments').delete().eq('id', treatmentId)
+    setDeleteTarget(null)
+    setDeleting(false)
+    onClaimSuccess?.()
+  }
 
   const sorted = [...treatments].sort((a, b) => a.date.localeCompare(b.date))
 
@@ -56,22 +67,52 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
           return (
             <div key={t.id} className="task-group">
               {/* Group header */}
-              <div className="task-group-header">
-                <div className="tgh-left">
-                  <Pill size={15} color="var(--rose-deep)" />
-                  <div className="tgh-date">
-                    {d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              {deleteTarget === t.id ? (
+                <div className="task-group-header">
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Delete this date?</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn-cancel" style={{ padding: '4px 12px', fontSize: 12 }} onClick={() => setDeleteTarget(null)}>
+                      Cancel
+                    </button>
+                    <button
+                      className="btn-primary"
+                      style={{ padding: '4px 12px', fontSize: 12, background: '#C0392B', flex: 'none' }}
+                      onClick={() => handleDelete(t.id)}
+                      disabled={deleting}
+                    >
+                      {deleting ? 'Deleting…' : 'Delete'}
+                    </button>
                   </div>
                 </div>
-                {open > 0
-                  ? <span className="badge">{open} open</span>
-                  : (
-                    <span style={{ fontSize: 12, color: 'var(--sage)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Check size={12} color="var(--sage)" strokeWidth={2.5} /> Covered
-                    </span>
-                  )
-                }
-              </div>
+              ) : (
+                <div className="task-group-header">
+                  <div className="tgh-left">
+                    <Pill size={15} color="var(--rose-deep)" />
+                    <div className="tgh-date">
+                      {d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {open > 0
+                      ? <span className="badge">{open} open</span>
+                      : (
+                        <span style={{ fontSize: 12, color: 'var(--sage)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <Check size={12} color="var(--sage)" strokeWidth={2.5} /> Covered
+                        </span>
+                      )
+                    }
+                    {isPatient && (
+                      <button
+                        onClick={() => setDeleteTarget(t.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+                        title="Delete treatment date"
+                      >
+                        <Trash2 size={14} color="var(--text-light)" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Task items */}
               {tasks.length === 0 ? (
