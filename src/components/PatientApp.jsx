@@ -12,6 +12,9 @@ export default function PatientApp({ session, showToast }) {
   const [activeTab, setActiveTab] = useState('calendar')
   const [showAddModal, setShowAddModal] = useState(false)
   const [showProfileSheet, setShowProfileSheet] = useState(false)
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const [savingName, setSavingName] = useState(false)
   const [addModalDate, setAddModalDate] = useState('')
   const [savingTreatment, setSavingTreatment] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -158,6 +161,19 @@ export default function PatientApp({ session, showToast }) {
     }
   }
 
+  const handleSaveName = async () => {
+    const trimmed = nameInput.trim()
+    if (!trimmed) return
+    setSavingName(true)
+    const { error } = await supabase.from('circles').update({ patient_name: trimmed }).eq('id', circle.id)
+    setSavingName(false)
+    if (!error) {
+      setCircle(prev => ({ ...prev, patient_name: trimmed }))
+      setEditingName(false)
+      showToast('Name updated!')
+    }
+  }
+
   const openAddDate = (date = '') => {
     setAddModalDate(date)
     setShowAddModal(true)
@@ -292,10 +308,10 @@ export default function PatientApp({ session, showToast }) {
 
       {/* Profile sheet */}
       {showProfileSheet && (
-        <div className="modal-bg" onClick={() => setShowProfileSheet(false)}>
+        <div className="modal-bg" onClick={() => { setShowProfileSheet(false); setEditingName(false) }}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-handle" />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
               <div style={{
                 width: 52, height: 52, borderRadius: '50%',
                 background: 'var(--rose-pale)', border: '2px solid var(--rose)',
@@ -304,22 +320,58 @@ export default function PatientApp({ session, showToast }) {
               }}>
                 {avatarInitials}
               </div>
-              <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text)' }}>
-                  {patientName}
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 2 }}>
                   {session.user.email}
                 </div>
               </div>
             </div>
-            <button
-              className="btn-primary"
-              style={{ background: 'none', color: 'var(--rose-deep)', border: '1px solid var(--rose)' }}
-              onClick={() => supabase.auth.signOut()}
-            >
-              Sign out
-            </button>
+
+            {editingName ? (
+              <>
+                <label className="form-label" htmlFor="profile-name">Display name</label>
+                <input
+                  id="profile-name"
+                  className="form-input"
+                  type="text"
+                  value={nameInput}
+                  onChange={e => setNameInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSaveName()}
+                  autoFocus
+                />
+                <div className="modal-actions">
+                  <button className="btn-cancel" onClick={() => setEditingName(false)}>Cancel</button>
+                  <button
+                    className="btn-primary"
+                    onClick={handleSaveName}
+                    disabled={savingName || !nameInput.trim()}
+                  >
+                    {savingName ? 'Saving…' : 'Save name'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text)' }}>
+                    {patientName}
+                  </div>
+                  <button
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--rose-deep)', fontFamily: 'var(--font-body)', fontWeight: 500 }}
+                    onClick={() => { setNameInput(patientName); setEditingName(true) }}
+                  >
+                    Edit name
+                  </button>
+                </div>
+                <button
+                  className="btn-primary"
+                  style={{ background: 'none', color: 'var(--rose-deep)', border: '1px solid var(--rose)' }}
+                  onClick={() => supabase.auth.signOut()}
+                >
+                  Sign out
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -7,6 +7,7 @@ import ClaimModal from './ClaimModal'
 export default function TaskList({ treatments, isPatient, patientName, showToast, onClaimSuccess }) {
   const [claimTarget, setClaimTarget] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [claimSucceeded, setClaimSucceeded] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null) // treatment id pending confirmation
   const [deleting, setDeleting] = useState(false)
   const claimerNameRef = useRef('')
@@ -23,6 +24,7 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
   const sorted = [...treatments].sort((a, b) => a.date.localeCompare(b.date))
 
   const openClaim = (treatment, task) => {
+    setClaimSucceeded(false)
     setClaimTarget({ treatment, task })
   }
 
@@ -41,8 +43,7 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
     if (error) {
       showToast('Could not claim — someone may have just taken it!')
     } else {
-      showToast(`Signed up! ${patientName} will be notified.`)
-      setClaimTarget(null)
+      setClaimSucceeded(true)
       onClaimSuccess?.()
     }
   }
@@ -169,7 +170,8 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
           initialName={claimerNameRef.current}
           patientName={patientName}
           saving={saving}
-          onClose={() => setClaimTarget(null)}
+          claimed={claimSucceeded}
+          onClose={() => { setClaimTarget(null); setClaimSucceeded(false) }}
           onClaim={handleClaim}
         />
       )}
