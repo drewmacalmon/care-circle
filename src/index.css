@@ -531,6 +531,14 @@ body {
 .claimer-input:focus { border-color: var(--rose); }
 
 /* ─── Login ───────────────────────────────────── */
+.login-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
 .login-screen {
   flex: 1;
   display: flex;

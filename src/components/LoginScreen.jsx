@@ -11,7 +11,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <div className="phone">
+    <div className="login-page">
       <div className="login-screen">
         <div className="login-logo">Care Circle</div>
         <div className="login-tagline">Show up for the ones you love.</div>
@@ -35,3 +35,4 @@ export default function LoginScreen() {
     </div>
   )
 }
+
