@@ -11,17 +11,31 @@ export default function FriendView({ showToast, session }) {
   const [notFound, setNotFound] = useState(false)
 
   const fetchData = useCallback(async (circleId) => {
-    const { data } = await supabase
+    const { data: treatmentsData, error: tErr } = await supabase
       .from('treatments')
-      .select('*, tasks(*)')
+      .select('*')
       .eq('circle_id', circleId)
       .order('date', { ascending: true })
-    if (data) {
-      setTreatments(data.map(t => ({
-        ...t,
-        tasks: (t.tasks || []).sort((a, b) => a.id - b.id),
-      })))
+
+    if (tErr) { console.error('treatments fetch error:', tErr); return }
+    if (!treatmentsData) return
+
+    const ids = treatmentsData.map(t => t.id)
+    let tasksData = []
+    if (ids.length > 0) {
+      const { data: tasks, error: tkErr } = await supabase
+        .from('tasks')
+        .select('*')
+        .in('treatment_id', ids)
+        .order('id', { ascending: true })
+      if (tkErr) console.error('tasks fetch error:', tkErr)
+      else tasksData = tasks || []
     }
+
+    setTreatments(treatmentsData.map(t => ({
+      ...t,
+      tasks: tasksData.filter(tk => tk.treatment_id === t.id),
+    })))
   }, [])
 
   useEffect(() => {
