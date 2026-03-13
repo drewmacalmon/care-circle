@@ -37,12 +37,25 @@ body {
 /* ─── Phone shell ─────────────────────────────── */
 .phone {
   width: 100%;
-  max-width: 430px;
+  max-width: 100%;
   min-height: 100vh;
   background: var(--surface);
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+/* Content column — wraps header + tab content */
+.content-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Desktop sidebar — hidden on mobile */
+.sidebar {
+  display: none;
 }
 
 /* ─── Header ──────────────────────────────────── */
@@ -587,3 +600,124 @@ body {
   font-size: 14px;
   line-height: 1.6;
 }
+
+/* ─── Desktop layout (≥ 768px) ────────────────── */
+@media (min-width: 768px) {
+  body {
+    background: var(--bg);
+    padding: 0;
+    justify-content: center;
+  }
+
+  .phone {
+    max-width: 980px;
+    flex-direction: row;
+    min-height: 100vh;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+
+  /* Show sidebar, hide bottom nav */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 230px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .nav { display: none; }
+
+  /* Content column fills remaining space */
+  .content-col {
+    min-height: 100vh;
+  }
+
+  /* Header tweaks */
+  .header {
+    padding: 20px 28px 14px;
+  }
+  .header .app-name { display: none; }
+
+  /* FAB: anchor to content area right edge */
+  .fab {
+    right: 24px;
+    bottom: 32px;
+  }
+
+  /* Toast: sit higher on desktop, no bottom nav offset */
+  .toast {
+    bottom: 32px;
+  }
+
+  /* Tasks / calendar content padding */
+  .tasks-container { padding: 0 24px 20px; }
+  .cal-grid { padding: 0 24px 8px; }
+  .cal-header { padding: 20px 28px 8px; }
+  .section-title { padding: 20px 28px 10px; }
+  .treatment-card { margin: 0 24px 10px; }
+  .stat-row { margin: 0 24px 16px; }
+  .info-row { margin: 0 24px 10px; }
+  .share-card { margin: 16px 24px; }
+}
+
+/* ─── Sidebar internals ───────────────────────── */
+.sidebar-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--rose-deep);
+  letter-spacing: -0.3px;
+  padding: 28px 24px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  flex: 1;
+}
+
+.sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 24px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.sidebar-btn:hover {
+  background: var(--rose-pale);
+  color: var(--text);
+}
+
+.sidebar-btn.active {
+  color: var(--rose-deep);
+  border-left-color: var(--rose-deep);
+  background: var(--rose-pale);
+  font-weight: 500;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.sidebar-footer:hover .avatar { border-color: var(--rose-deep); }

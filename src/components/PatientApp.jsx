@@ -151,80 +151,99 @@ export default function PatientApp({ session, showToast }) {
     treatments.flatMap(t => (t.tasks || []).filter(tk => tk.claimed_by).map(tk => tk.claimed_by))
   ).size
 
+  const navItems = [
+    { id: 'calendar', label: 'Calendar', Icon: Calendar },
+    { id: 'tasks',    label: 'Tasks',    Icon: CheckSquare },
+    { id: 'share',    label: 'Share',    Icon: Share2 },
+  ]
+
   return (
     <div className="phone">
-      {/* Header */}
-      <div className="header">
-        <div className="header-top">
-          <div className="app-name">Care Circle</div>
-          <div
-            className="avatar"
-            onClick={() => supabase.auth.signOut()}
-            title="Sign out"
-          >
-            {avatarInitials}
+
+      {/* ── Desktop sidebar (hidden on mobile via CSS) ── */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">Care Circle</div>
+        <nav className="sidebar-nav">
+          {navItems.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              className={`sidebar-btn${activeTab === id ? ' active' : ''}`}
+              onClick={() => setActiveTab(id)}
+            >
+              <Icon size={18} color={activeTab === id ? 'var(--rose-deep)' : 'var(--text-light)'} />
+              {label}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-footer" onClick={() => supabase.auth.signOut()} title="Sign out">
+          <div className="avatar">{avatarInitials}</div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{firstName}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Sign out</div>
           </div>
         </div>
-        <div className="header-sub">
-          {firstName}'s circle · {helperCount} {helperCount === 1 ? 'friend' : 'friends'} helping
-        </div>
-      </div>
+      </aside>
 
-      {/* Tab content */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {activeTab === 'calendar' && (
-          <CalendarTab
-            treatments={treatments}
-            onDayClick={(date, hasTreatment) => {
-              if (hasTreatment) setActiveTab('tasks')
-              else openAddDate(date)
-            }}
-            onTreatmentClick={() => setActiveTab('tasks')}
-          />
-        )}
-        {activeTab === 'tasks' && (
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            <TaskList
+      {/* ── Content column (header + tab content) ── */}
+      <div className="content-col">
+        {/* Header */}
+        <div className="header">
+          <div className="header-top">
+            <div className="app-name">Care Circle</div>
+            <div className="avatar" onClick={() => supabase.auth.signOut()} title="Sign out">
+              {avatarInitials}
+            </div>
+          </div>
+          <div className="header-sub">
+            {firstName}'s circle · {helperCount} {helperCount === 1 ? 'friend' : 'friends'} helping
+          </div>
+        </div>
+
+        {/* Tab content */}
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {activeTab === 'calendar' && (
+            <CalendarTab
               treatments={treatments}
-              isPatient
-              patientName={firstName}
-              showToast={showToast}
-              onClaimSuccess={() => fetchTreatments(circle.id)}
+              onDayClick={(date, hasTreatment) => {
+                if (hasTreatment) setActiveTab('tasks')
+                else openAddDate(date)
+              }}
+              onTreatmentClick={() => setActiveTab('tasks')}
             />
-          </div>
-        )}
-        {activeTab === 'share' && (
-          <ShareTab
-            circle={circle}
-            treatments={treatments}
-            showToast={showToast}
-          />
-        )}
+          )}
+          {activeTab === 'tasks' && (
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <TaskList
+                treatments={treatments}
+                isPatient
+                patientName={firstName}
+                showToast={showToast}
+                onClaimSuccess={() => fetchTreatments(circle.id)}
+              />
+            </div>
+          )}
+          {activeTab === 'share' && (
+            <ShareTab
+              circle={circle}
+              treatments={treatments}
+              showToast={showToast}
+            />
+          )}
+        </div>
       </div>
 
-      {/* Bottom nav */}
+      {/* ── Mobile bottom nav (hidden on desktop via CSS) ── */}
       <div className="nav">
-        <button
-          className={`nav-btn${activeTab === 'calendar' ? ' active' : ''}`}
-          onClick={() => setActiveTab('calendar')}
-        >
-          <Calendar size={20} stroke={activeTab === 'calendar' ? 'var(--rose-deep)' : 'var(--text-light)'} />
-          Calendar
-        </button>
-        <button
-          className={`nav-btn${activeTab === 'tasks' ? ' active' : ''}`}
-          onClick={() => setActiveTab('tasks')}
-        >
-          <CheckSquare size={20} stroke={activeTab === 'tasks' ? 'var(--rose-deep)' : 'var(--text-light)'} />
-          Tasks
-        </button>
-        <button
-          className={`nav-btn${activeTab === 'share' ? ' active' : ''}`}
-          onClick={() => setActiveTab('share')}
-        >
-          <Share2 size={20} stroke={activeTab === 'share' ? 'var(--rose-deep)' : 'var(--text-light)'} />
-          Share
-        </button>
+        {navItems.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            className={`nav-btn${activeTab === id ? ' active' : ''}`}
+            onClick={() => setActiveTab(id)}
+          >
+            <Icon size={20} stroke={activeTab === id ? 'var(--rose-deep)' : 'var(--text-light)'} />
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* FAB — only on Calendar tab */}

@@ -101,48 +101,64 @@ export default function FriendView({ showToast, session }) {
 
   return (
     <div className="phone">
-      {/* Header */}
-      <div className="header">
-        <div className="header-top">
-          <div className="app-name">Care Circle</div>
-          <div
-            className="avatar"
-            title={patientName}
-            style={{ cursor: 'default' }}
-          >
-            {avatarInitials}
+
+      {/* ── Desktop sidebar ── */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">Care Circle</div>
+        <nav className="sidebar-nav">
+          <button className="sidebar-btn active">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--rose-deep)" strokeWidth="1.8">
+              <polyline points="9 11 12 14 22 4"/>
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+            All tasks
+          </button>
+        </nav>
+        <div className="sidebar-footer" style={{ cursor: 'default' }}>
+          <div className="avatar" style={{ cursor: 'default' }}>{avatarInitials}</div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{firstName}'s circle</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Sign up to help</div>
           </div>
         </div>
-        <div className="header-sub">{firstName}'s circle · Sign up to help</div>
-      </div>
+      </aside>
 
-      {/* Intro copy */}
-      <div style={{ padding: '16px 20px 0' }}>
-        <div style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 17,
-          color: 'var(--rose-deep)',
-          marginBottom: 6,
-        }}>
-          Help {firstName}'s circle
+      {/* ── Content column ── */}
+      <div className="content-col">
+        {/* Header */}
+        <div className="header">
+          <div className="header-top">
+            <div className="app-name">Care Circle</div>
+            <div className="avatar" title={patientName} style={{ cursor: 'default' }}>
+              {avatarInitials}
+            </div>
+          </div>
+          <div className="header-sub">{firstName}'s circle · Sign up to help</div>
         </div>
-        <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-          Pick the tasks that work for you. {firstName} will be notified when you sign up.
+
+        {/* Intro copy */}
+        <div style={{ padding: '16px 20px 0' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--rose-deep)', marginBottom: 6 }}>
+            Help {firstName}'s circle
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+            Pick the tasks that work for you. {firstName} will be notified when you sign up.
+          </div>
+        </div>
+
+        {/* Task list */}
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          <TaskList
+            treatments={treatments}
+            isPatient={false}
+            patientName={firstName}
+            showToast={showToast}
+            onClaimSuccess={() => fetchData(circle.id)}
+          />
         </div>
       </div>
 
-      {/* Task list */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        <TaskList
-          treatments={treatments}
-          isPatient={false}
-          patientName={firstName}
-          showToast={showToast}
-          onClaimSuccess={() => fetchData(circle.id)}
-        />
-      </div>
-
-      {/* Bottom nav — single tab for friends */}
+      {/* ── Mobile bottom nav ── */}
       <div className="nav">
         <button className="nav-btn active">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--rose-deep)" strokeWidth="1.5">
