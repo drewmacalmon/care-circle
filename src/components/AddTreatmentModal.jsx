@@ -4,7 +4,7 @@ import { TASK_TYPES } from '../constants'
 export default function AddTreatmentModal({ initialDate, onClose, onSave, saving }) {
   const [date, setDate] = useState(initialDate || '')
   const [notes, setNotes] = useState('')
-  const [selected, setSelected] = useState(new Set())
+  const [selected, setSelected] = useState(new Set(TASK_TYPES.map(t => t.id)))
   const [customTask, setCustomTask] = useState('')
 
   const toggle = (id) => {
