@@ -108,7 +108,7 @@ body {
   display: flex;
   border-top: 1px solid var(--border);
   background: var(--surface);
-  padding: 8px 0 12px;
+  padding: 8px 0 max(12px, env(safe-area-inset-bottom));
 }
 .nav-btn {
   flex: 1;
@@ -247,7 +247,7 @@ body {
 /* ─── FAB ─────────────────────────────────────── */
 .fab {
   position: fixed;
-  bottom: 80px;
+  bottom: calc(80px + env(safe-area-inset-bottom));
   right: max(calc(50vw - 215px + 16px), 16px);
   width: 52px;
   height: 52px;
