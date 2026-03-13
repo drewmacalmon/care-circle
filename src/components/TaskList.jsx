@@ -7,6 +7,7 @@ import ClaimModal from './ClaimModal'
 export default function TaskList({ treatments, isPatient, patientName, showToast, onClaimSuccess }) {
   const [claimTarget, setClaimTarget] = useState(null)
   const [editTarget, setEditTarget] = useState(null)
+  const [editSucceeded, setEditSucceeded] = useState(false)
   const [saving, setSaving] = useState(false)
   const [claimSucceeded, setClaimSucceeded] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null) // treatment id pending confirmation
@@ -30,6 +31,7 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
   }
 
   const openEdit = (treatment, task) => {
+    setEditSucceeded(false)
     setEditTarget({ treatment, task })
   }
 
@@ -40,8 +42,7 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
       .update({ claimed_by: name, claimed_at: new Date().toISOString() })
       .eq('id', editTarget.task.id)
     setSaving(false)
-    setEditTarget(null)
-    showToast('Signup updated!')
+    setEditSucceeded(true)
     onClaimSuccess?.()
   }
 
@@ -221,7 +222,8 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
           initialName={editTarget.task.claimed_by || ''}
           patientName={patientName}
           saving={saving}
-          onClose={() => setEditTarget(null)}
+          claimed={editSucceeded}
+          onClose={() => { setEditTarget(null); setEditSucceeded(false) }}
           onClaim={handleEditClaim}
           onUnclaim={handleUnclaim}
         />
