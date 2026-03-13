@@ -11,6 +11,7 @@ export default function PatientApp({ session, showToast }) {
   const [treatments, setTreatments] = useState([])
   const [activeTab, setActiveTab] = useState('calendar')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showProfileSheet, setShowProfileSheet] = useState(false)
   const [addModalDate, setAddModalDate] = useState('')
   const [savingTreatment, setSavingTreatment] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -201,11 +202,11 @@ export default function PatientApp({ session, showToast }) {
             </button>
           ))}
         </nav>
-        <div className="sidebar-footer" onClick={() => supabase.auth.signOut()} title="Sign out">
+        <div className="sidebar-footer" onClick={() => setShowProfileSheet(true)}>
           <div className="avatar">{avatarInitials}</div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{firstName}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Sign out</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>View profile</div>
           </div>
         </div>
       </aside>
@@ -216,7 +217,7 @@ export default function PatientApp({ session, showToast }) {
         <div className="header">
           <div className="header-top">
             <div className="app-name">Care Circle</div>
-            <div className="avatar" onClick={() => supabase.auth.signOut()} title="Sign out">
+            <div className="avatar" onClick={() => setShowProfileSheet(true)} title="Profile">
               {avatarInitials}
             </div>
           </div>
@@ -287,6 +288,40 @@ export default function PatientApp({ session, showToast }) {
           onClose={() => setShowAddModal(false)}
           onSave={handleAddTreatment}
         />
+      )}
+
+      {/* Profile sheet */}
+      {showProfileSheet && (
+        <div className="modal-bg" onClick={() => setShowProfileSheet(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: '50%',
+                background: 'var(--rose-pale)', border: '2px solid var(--rose)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 18, fontWeight: 500, color: 'var(--rose-deep)', flexShrink: 0,
+              }}>
+                {avatarInitials}
+              </div>
+              <div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--text)' }}>
+                  {patientName}
+                </div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+                  {session.user.email}
+                </div>
+              </div>
+            </div>
+            <button
+              className="btn-primary"
+              style={{ background: 'none', color: 'var(--rose-deep)', border: '1px solid var(--rose)' }}
+              onClick={() => supabase.auth.signOut()}
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

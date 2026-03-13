@@ -445,7 +445,7 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--rm);
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 16px; /* 16px min prevents iOS auto-zoom on focus */
   font-family: var(--font-body);
   color: var(--text);
   background: var(--bg);
@@ -453,6 +453,10 @@ body {
   outline: none;
 }
 .form-input:focus { border-color: var(--rose); }
+
+@media (min-width: 768px) {
+  .form-input { font-size: 14px; }
+}
 .task-toggle { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .task-toggle-btn {
   display: flex;
@@ -503,7 +507,7 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--rm);
   padding: 10px 12px;
-  font-size: 15px;
+  font-size: 16px; /* 16px min prevents iOS auto-zoom on focus */
   font-family: var(--font-body);
   color: var(--text);
   background: var(--bg);
