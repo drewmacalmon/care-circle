@@ -31,7 +31,11 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  body { align-items: center; }
 }
 
 /* ─── Phone shell ─────────────────────────────── */
