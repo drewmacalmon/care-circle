@@ -92,26 +92,34 @@ export default function PatientApp({ session, showToast }) {
     setSavingTreatment(true)
 
     try {
-      // Check if treatment exists for this date
       const existing = treatments.find(t => t.date === date)
       let treatmentId
 
       if (existing) {
         treatmentId = existing.id
         if (notes && notes !== existing.notes) {
-          await supabase.from('treatments').update({ notes }).eq('id', existing.id)
+          const { error } = await supabase.from('treatments').update({ notes }).eq('id', existing.id)
+          if (error) throw error
         }
       } else {
-        const { data, error } = await supabase
+        // Insert without .single() so a select failure doesn't mask a successful insert
+        const { error: insertError } = await supabase
           .from('treatments')
           .insert({ circle_id: circle.id, date, notes: notes || null })
-          .select()
+        if (insertError) throw insertError
+
+        // Fetch back the ID we just created
+        const { data: newRow, error: fetchError } = await supabase
+          .from('treatments')
+          .select('id')
+          .eq('circle_id', circle.id)
+          .eq('date', date)
           .single()
-        if (error) throw error
-        treatmentId = data.id
+        if (fetchError) throw fetchError
+        treatmentId = newRow.id
       }
 
-      // Insert selected task types
+      // Insert tasks
       const rows = [
         ...taskTypes.map(t => ({ treatment_id: treatmentId, type: t.id, label: t.label })),
         ...(customTask ? [{ treatment_id: treatmentId, type: 'custom', label: customTask }] : []),
@@ -124,8 +132,9 @@ export default function PatientApp({ session, showToast }) {
       await fetchTreatments(circle.id)
       setShowAddModal(false)
       showToast('Treatment date saved!')
-    } catch {
-      showToast('Something went wrong. Please try again.')
+    } catch (err) {
+      console.error('handleAddTreatment error:', err)
+      showToast(err?.message || 'Something went wrong. Please try again.')
     } finally {
       setSavingTreatment(false)
     }
