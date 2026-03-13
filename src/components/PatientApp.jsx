@@ -47,11 +47,13 @@ export default function PatientApp({ session, showToast }) {
   // Load or create circle on mount
   useEffect(() => {
     const init = async () => {
-      const { data: existing } = await supabase
+      const { data: rows } = await supabase
         .from('circles')
         .select('*')
         .eq('owner_id', session.user.id)
-        .maybeSingle()
+        .limit(1)
+
+      const existing = rows?.[0] || null
 
       if (existing) {
         setCircle(existing)
