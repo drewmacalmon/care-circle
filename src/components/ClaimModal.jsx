@@ -3,13 +3,11 @@ import { TASK_ICON_MAP } from '../constants'
 import { CalendarPlus, ExternalLink } from 'lucide-react'
 
 function formatDateCompact(dateStr) {
-  // dateStr = 'YYYY-MM-DD' → 'YYYYMMDD'
   return dateStr.replace(/-/g, '')
 }
 
 function makeICS(treatment, task, patientName) {
   const start = formatDateCompact(treatment.date)
-  // End date is next day for all-day events in iCal
   const d = new Date(treatment.date + 'T12:00:00')
   d.setDate(d.getDate() + 1)
   const end = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
@@ -48,7 +46,12 @@ function makeGoogleCalURL(treatment, task, patientName) {
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=${details}`
 }
 
-export default function ClaimModal({ treatment, task, initialName, patientName, onClose, onClaim, saving, claimed }) {
+// mode: 'claim' | 'edit'
+export default function ClaimModal({
+  treatment, task, initialName, patientName,
+  onClose, onClaim, onUnclaim, saving,
+  claimed, mode = 'claim',
+}) {
   const [name, setName] = useState(initialName || '')
 
   const handleSubmit = () => {
@@ -91,6 +94,7 @@ export default function ClaimModal({ treatment, task, initialName, patientName, 
           </div>
         </div>
 
+        {/* ── Post-claim success state ── */}
         {claimed ? (
           <>
             <div style={{
@@ -144,7 +148,46 @@ export default function ClaimModal({ treatment, task, initialName, patientName, 
               Done
             </button>
           </>
+
+        ) : mode === 'edit' ? (
+          /* ── Edit existing claim ── */
+          <>
+            <label className="form-label" htmlFor="claimer-name">Your name</label>
+            <input
+              id="claimer-name"
+              className="claimer-input"
+              type="text"
+              placeholder="First name is fine"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+              autoFocus
+            />
+
+            <div className="modal-actions" style={{ flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                <button className="btn-cancel" onClick={onClose}>Cancel</button>
+                <button
+                  className="btn-primary"
+                  onClick={handleSubmit}
+                  disabled={saving || !name.trim()}
+                >
+                  {saving ? 'Saving…' : 'Update name'}
+                </button>
+              </div>
+              <button
+                className="btn-cancel"
+                style={{ width: '100%', color: '#C0392B', borderColor: '#e8b4b4' }}
+                onClick={onUnclaim}
+                disabled={saving}
+              >
+                Remove my signup
+              </button>
+            </div>
+          </>
+
         ) : (
+          /* ── New claim ── */
           <>
             <label className="form-label" htmlFor="claimer-name">Your name</label>
             <input

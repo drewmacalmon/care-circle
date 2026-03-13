@@ -6,6 +6,7 @@ import ClaimModal from './ClaimModal'
 
 export default function TaskList({ treatments, isPatient, patientName, showToast, onClaimSuccess }) {
   const [claimTarget, setClaimTarget] = useState(null)
+  const [editTarget, setEditTarget] = useState(null)
   const [saving, setSaving] = useState(false)
   const [claimSucceeded, setClaimSucceeded] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null) // treatment id pending confirmation
@@ -26,6 +27,34 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
   const openClaim = (treatment, task) => {
     setClaimSucceeded(false)
     setClaimTarget({ treatment, task })
+  }
+
+  const openEdit = (treatment, task) => {
+    setEditTarget({ treatment, task })
+  }
+
+  const handleEditClaim = async (name) => {
+    setSaving(true)
+    await supabase
+      .from('tasks')
+      .update({ claimed_by: name, claimed_at: new Date().toISOString() })
+      .eq('id', editTarget.task.id)
+    setSaving(false)
+    setEditTarget(null)
+    showToast('Signup updated!')
+    onClaimSuccess?.()
+  }
+
+  const handleUnclaim = async () => {
+    setSaving(true)
+    await supabase
+      .from('tasks')
+      .update({ claimed_by: null, claimed_at: null })
+      .eq('id', editTarget.task.id)
+    setSaving(false)
+    setEditTarget(null)
+    showToast('Signup removed.')
+    onClaimSuccess?.()
   }
 
   const handleClaim = async (name) => {
@@ -145,7 +174,15 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
                           : <div className="task-note">Nobody signed up yet</div>
                         }
                       </div>
-                      {!claimed && (
+                      {claimed ? (
+                        <button
+                          className="task-action"
+                          style={{ color: 'var(--text-muted)', borderColor: 'var(--border)' }}
+                          onClick={() => openEdit(t, task)}
+                        >
+                          Edit
+                        </button>
+                      ) : (
                         <button
                           className="task-action"
                           onClick={() => openClaim(t, task)}
@@ -173,6 +210,20 @@ export default function TaskList({ treatments, isPatient, patientName, showToast
           claimed={claimSucceeded}
           onClose={() => { setClaimTarget(null); setClaimSucceeded(false) }}
           onClaim={handleClaim}
+        />
+      )}
+
+      {editTarget && (
+        <ClaimModal
+          mode="edit"
+          treatment={editTarget.treatment}
+          task={editTarget.task}
+          initialName={editTarget.task.claimed_by || ''}
+          patientName={patientName}
+          saving={saving}
+          onClose={() => setEditTarget(null)}
+          onClaim={handleEditClaim}
+          onUnclaim={handleUnclaim}
         />
       )}
     </>
